@@ -333,4 +333,90 @@ describe('services_CommandService', () => {
 		const command = service.commandByName('test1');
 		expect(command.declaration.iconName).toBe('fas fa-cog');
 	});
+
+	it('should store custom icon data URI on declaration', () => {
+		const service = newService();
+		const fakeDataUri = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==';
+
+		service.registerDeclaration({
+			name: 'testCustomIcon',
+			label: 'Test custom icon',
+			icon: fakeDataUri,
+		});
+
+		service.registerRuntime('testCustomIcon', {
+			execute: async () => {},
+		});
+
+		expect(service.icon('testCustomIcon')).toBe(fakeDataUri);
+		// iconName should still get the default since we didn't set it
+		expect(service.iconName('testCustomIcon')).toBe('fas fa-cog');
+	});
+
+	it('should return empty string for icon() when no custom icon set', () => {
+		const service = newService();
+
+		registerCommand(service, createCommand('testNoIcon', {
+			execute: () => {},
+		}));
+
+		expect(service.icon('testNoIcon')).toBe('');
+	});
+
+	it('should pass custom icon through to toolbar button info', async () => {
+		const service = newService();
+		const toolbarButtonUtils = new ToolbarButtonUtils(service);
+		const fakeDataUri = 'data:image/png;base64,iVBORw0KGgo=';
+
+		service.registerDeclaration({
+			name: 'testIconButton',
+			label: 'Test',
+			iconName: 'fas fa-star',
+			icon: fakeDataUri,
+		});
+
+		service.registerRuntime('testIconButton', {
+			execute: async () => {},
+		});
+
+		const toolbarInfos = toolbarButtonUtils.commandsToToolbarButtons(['testIconButton'], {});
+		expect(toolbarInfos[0].icon).toBe(fakeDataUri);
+		expect(toolbarInfos[0].iconName).toBe('fas fa-star');
+	});
+
+	it('should not set icon on toolbar button info when no custom icon', async () => {
+		const service = newService();
+		const toolbarButtonUtils = new ToolbarButtonUtils(service);
+
+		registerCommand(service, createCommand('testNoIconButton', {
+			execute: () => {},
+		}));
+
+		const toolbarInfos = toolbarButtonUtils.commandsToToolbarButtons(['testNoIconButton'], {});
+		expect(toolbarInfos[0].icon).toBeUndefined();
+		expect(toolbarInfos[0].iconName).toBe('fas fa-cog');
+	});
+
+	it('should cache toolbar buttons with custom icon correctly', async () => {
+		const service = newService();
+		const toolbarButtonUtils = new ToolbarButtonUtils(service);
+		const fakeDataUri = 'data:image/svg+xml;base64,PHN2Zz4=';
+
+		service.registerDeclaration({
+			name: 'testCacheIcon',
+			label: 'Test cache',
+			icon: fakeDataUri,
+		});
+
+		service.registerRuntime('testCacheIcon', {
+			execute: async () => {},
+		});
+
+		const infos1 = toolbarButtonUtils.commandsToToolbarButtons(['testCacheIcon'], {});
+		const infos2 = toolbarButtonUtils.commandsToToolbarButtons(['testCacheIcon'], {});
+
+		// Should return the exact same array (cached)
+		expect(infos1).toBe(infos2);
+		expect(infos1[0].icon).toBe(fakeDataUri);
+	});
 });

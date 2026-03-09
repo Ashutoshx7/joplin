@@ -33,8 +33,16 @@ export default function ToolbarButton(props: Props) {
 	const tooltip = getProp(props, 'tooltip', title);
 
 	let icon = null;
+	const customIcon = getProp(props, 'icon');
 	const iconName = getProp(props, 'iconName');
-	if (iconName) {
+	if (customIcon) {
+		icon = <img
+			src={customIcon}
+			className={`toolbar-icon toolbar-icon-custom ${title ? '-has-title' : ''}`}
+			aria-hidden={true}
+			role="img"
+		/>;
+	} else if (iconName) {
 		const iconProps: React.HTMLProps<HTMLDivElement> = {
 			'aria-hidden': true,
 			role: 'img',

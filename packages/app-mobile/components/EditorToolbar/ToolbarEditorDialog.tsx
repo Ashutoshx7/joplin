@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
 import createRootStyle from '../../utils/createRootStyle';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { Image, View, StyleSheet, ScrollView } from 'react-native';
 import { Divider, Text, TouchableRipple } from 'react-native-paper';
 import { _ } from '@joplin/lib/locale';
 import { themeStyle } from '../global-style';
@@ -111,7 +111,10 @@ const ToolbarItemToggle: React.FC<ItemToggleProps> = ({
 		>
 			<View style={styles.listItem}>
 				<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
-				<Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
+				{item.icon
+					? <Image source={{ uri: item.icon }} style={{ width: 20, height: 20, resizeMode: 'contain' }} accessibilityElementsHidden={true}/>
+					: <Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
+				}
 				<Text style={styles.labelText}>
 					{title}
 				</Text>

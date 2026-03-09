@@ -3,6 +3,19 @@
 import CommandService, { CommandContext, CommandDeclaration, CommandRuntime } from '../../CommandService';
 import { Command } from './types';
 import Plugin from '../Plugin';
+import shim from '../../../shim';
+import Logger from '@joplin/utils/Logger';
+
+const logger = Logger.create('JoplinCommands');
+
+const allowedIconExtensions = ['svg', 'png', 'jpg', 'jpeg', 'gif', 'webp'];
+const maxIconFileSize = 100 * 1024; // 100KB
+
+const mimeFromExtension = (ext: string): string => {
+	if (ext === 'svg') return 'image/svg+xml';
+	if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+	return `image/${ext}`;
+};
 
 /**
  * This class allows executing or registering new Joplin commands. Commands
@@ -113,6 +126,32 @@ export default class JoplinCommands {
 		};
 
 		if ('iconName' in command) declaration.iconName = command.iconName;
+
+		if ('icon' in command && command.icon) {
+			try {
+				const absPath = shim.fsDriver().resolveRelativePathWithinDir(
+					this.plugin_.baseDir, command.icon,
+				);
+
+				const ext = absPath.split('.').pop().toLowerCase();
+				if (!allowedIconExtensions.includes(ext)) {
+					logger.warn(`Plugin "${this.plugin_.id}": Icon file "${command.icon}" has unsupported extension "${ext}". Allowed: ${allowedIconExtensions.join(', ')}`);
+				} else {
+					const stat = await shim.fsDriver().stat(absPath);
+					if (!stat) {
+						logger.warn(`Plugin "${this.plugin_.id}": Icon file not found: "${command.icon}"`);
+					} else if (stat.size > maxIconFileSize) {
+						logger.warn(`Plugin "${this.plugin_.id}": Icon file "${command.icon}" is too large (${stat.size} bytes, max ${maxIconFileSize})`);
+					} else {
+						const base64Data = await shim.fsDriver().readFile(absPath, 'base64');
+						const mime = mimeFromExtension(ext);
+						declaration.icon = `data:${mime};base64,${base64Data}`;
+					}
+				}
+			} catch (error) {
+				logger.warn(`Plugin "${this.plugin_.id}": Failed to load custom icon "${command.icon}":`, error.message);
+			}
+		}
 
 		const runtime: CommandRuntime = {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

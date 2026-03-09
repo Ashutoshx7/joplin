@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import IconButton from '../IconButton';
 import { memo, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet } from 'react-native';
 import { themeStyle } from '../global-style';
 import useButtonSize from './utils/useButtonSize';
 
@@ -37,7 +37,25 @@ const useStyles = (themeId: number, selected: boolean, enabled: boolean, extraPa
 
 const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected, extraPadding }) => {
 	const styles = useStyles(themeId, selected, buttonInfo.enabled, extraPadding);
+	const { iconSize } = useButtonSize();
 	const isToggleButton = selected !== undefined;
+
+	if (buttonInfo.icon) {
+		return <Pressable
+			onPress={buttonInfo.onClick}
+			disabled={!buttonInfo.enabled}
+			style={styles.button}
+			accessibilityState={{ selected }}
+			accessibilityRole={isToggleButton ? 'togglebutton' : 'button'}
+			accessibilityLabel={buttonInfo.title || buttonInfo.tooltip}
+		>
+			<Image
+				source={{ uri: buttonInfo.icon }}
+				style={{ width: iconSize, height: iconSize, resizeMode: 'contain' }}
+				accessibilityElementsHidden={true}
+			/>
+		</Pressable>;
+	}
 
 	return <IconButton
 		iconName={buttonInfo.iconName}

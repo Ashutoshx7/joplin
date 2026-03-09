@@ -24,6 +24,12 @@ export interface Command {
 	iconName?: string;
 
 	/**
+	 * Path to a custom icon file (SVG or PNG) relative to the plugin's directory.
+	 * If both `icon` and `iconName` are provided, `icon` takes precedence.
+	 */
+	icon?: string;
+
+	/**
 	 * Code to be ran when the command is executed. It may return a result.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied

@@ -1571,6 +1571,7 @@ packages/lib/services/plugins/WebviewController.js
 packages/lib/services/plugins/api/Global.js
 packages/lib/services/plugins/api/Joplin.js
 packages/lib/services/plugins/api/JoplinClipboard.js
+packages/lib/services/plugins/api/JoplinCommands.test.js
 packages/lib/services/plugins/api/JoplinCommands.js
 packages/lib/services/plugins/api/JoplinContentScripts.js
 packages/lib/services/plugins/api/JoplinData.js

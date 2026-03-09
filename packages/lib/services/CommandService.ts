@@ -51,6 +51,9 @@ export interface CommandDeclaration {
 	// All free Font Awesome icons are available: https://fontawesome.com/icons?d=gallery&m=free
 	iconName?: string;
 
+	// Custom icon as a data URI, resolved from a plugin-provided file path
+	icon?: string;
+
 	// Same as `role` key in Electron MenuItem:
 	// https://www.electronjs.org/docs/api/menu-item#new-menuitemoptions
 	// Note that due to a bug in Electron, menu items with a role cannot
@@ -401,6 +404,13 @@ export default class CommandService extends BaseService {
 		if (!command) throw new Error(`No such command: ${commandName}`);
 
 		return command.declaration.iconName;
+	}
+
+	public icon(commandName: string): string {
+		const command = this.commandByName(commandName);
+		if (!command) throw new Error(`No such command: ${commandName}`);
+
+		return command.declaration.icon || '';
 	}
 
 	public label(commandName: string, fullLabel = false): string {

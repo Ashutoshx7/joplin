@@ -11,6 +11,7 @@ export interface ToolbarButtonInfo {
 	name: string;
 	tooltip: string;
 	iconName: string;
+	icon?: string;
 	enabled: boolean;
 	visible: boolean;
 	onClick(): void;
@@ -53,6 +54,7 @@ export default class ToolbarButtonUtils {
 		const newVisible = this.service.isVisible(commandName, whenClauseContext);
 		const newTitle = this.service.title(commandName);
 		const newIcon = this.service.iconName(commandName);
+		const newCustomIcon = this.service.icon(commandName) || undefined;
 		const newLabel = this.service.label(commandName);
 
 		if (
@@ -61,6 +63,7 @@ export default class ToolbarButtonUtils {
 			this.toolbarButtonCache_[commandName].info.visible === newVisible &&
 			this.toolbarButtonCache_[commandName].info.title === newTitle &&
 			this.toolbarButtonCache_[commandName].info.iconName === newIcon &&
+			this.toolbarButtonCache_[commandName].info.icon === newCustomIcon &&
 			this.toolbarButtonCache_[commandName].info.tooltip === newLabel
 		) {
 			return this.toolbarButtonCache_[commandName].info;
@@ -71,6 +74,7 @@ export default class ToolbarButtonUtils {
 			name: commandName,
 			tooltip: newLabel,
 			iconName: newIcon,
+			icon: newCustomIcon,
 			enabled: newEnabled,
 			visible: newVisible,
 			onClick: async () => {

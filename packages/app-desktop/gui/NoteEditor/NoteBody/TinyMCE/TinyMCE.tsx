@@ -867,12 +867,17 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 					});
 
 					for (const pluginCommandName of pluginCommandNames) {
+						const customIcon = CommandService.instance().icon(pluginCommandName);
 						const iconClassName = CommandService.instance().iconName(pluginCommandName);
 
-						// Only allow characters that appear in Font Awesome class names: letters, spaces, and dashes.
-						const safeIconClassName = iconClassName.replace(/[^a-z0-9 -]/g, '');
+						if (customIcon) {
+							editor.ui.registry.addIcon(pluginCommandName, `<img src="${customIcon}" width="24" height="24" style="object-fit:contain" />`);
+						} else {
+							// Only allow characters that appear in Font Awesome class names: letters, spaces, and dashes.
+							const safeIconClassName = iconClassName.replace(/[^a-z0-9 -]/g, '');
 
-						editor.ui.registry.addIcon(pluginCommandName, `<i class="plugin-icon ${safeIconClassName}"></i>`);
+							editor.ui.registry.addIcon(pluginCommandName, `<i class="plugin-icon ${safeIconClassName}"></i>`);
+						}
 
 						editor.ui.registry.addButton(pluginCommandName, {
 							tooltip: CommandService.instance().label(pluginCommandName),

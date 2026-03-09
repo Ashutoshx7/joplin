@@ -9,3 +9,14 @@
 		margin-right: 5px;
 	}
 }
+
+img.toolbar-icon-custom {
+	width: var(--joplin-toolbar-icon-size);
+	height: var(--joplin-toolbar-icon-size);
+	object-fit: contain;
+	pointer-events: none;
+
+	&.-has-title {
+		margin-right: 5px;
+	}
+}
