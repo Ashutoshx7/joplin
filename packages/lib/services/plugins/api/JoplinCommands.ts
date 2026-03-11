@@ -5,17 +5,12 @@ import { Command } from './types';
 import Plugin from '../Plugin';
 import shim from '../../../shim';
 import Logger from '@joplin/utils/Logger';
+import { fromFileExtension } from '../../../mime-utils';
 
 const logger = Logger.create('JoplinCommands');
 
 const allowedIconExtensions = ['svg', 'png', 'jpg', 'jpeg', 'gif', 'webp'];
 const maxIconFileSize = 100 * 1024; // 100KB
-
-const mimeFromExtension = (ext: string): string => {
-	if (ext === 'svg') return 'image/svg+xml';
-	if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
-	return `image/${ext}`;
-};
 
 /**
  * This class allows executing or registering new Joplin commands. Commands
@@ -144,7 +139,7 @@ export default class JoplinCommands {
 						logger.warn(`Plugin "${this.plugin_.id}": Icon file "${command.icon}" is too large (${stat.size} bytes, max ${maxIconFileSize})`);
 					} else {
 						const base64Data = await shim.fsDriver().readFile(absPath, 'base64');
-						const mime = mimeFromExtension(ext);
+						const mime = fromFileExtension(ext) || `image/${ext}`;
 						declaration.icon = `data:${mime};base64,${base64Data}`;
 					}
 				}
