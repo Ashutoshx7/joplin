@@ -51,7 +51,8 @@ const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected, ex
 		>
 			<Image
 				source={{ uri: buttonInfo.icon }}
-				style={{ width: iconSize, height: iconSize, resizeMode: 'contain' }}
+				style={{ width: iconSize, height: iconSize }}
+				resizeMode="contain"
 				accessibilityElementsHidden={true}
 			/>
 		</Pressable>;

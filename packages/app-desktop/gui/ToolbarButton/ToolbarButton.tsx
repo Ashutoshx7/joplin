@@ -38,6 +38,7 @@ export default function ToolbarButton(props: Props) {
 	if (customIcon) {
 		icon = <img
 			src={customIcon}
+			alt=""
 			className={`toolbar-icon toolbar-icon-custom ${title ? '-has-title' : ''}`}
 			aria-hidden={true}
 			role="img"

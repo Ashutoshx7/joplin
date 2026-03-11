@@ -112,7 +112,7 @@ const ToolbarItemToggle: React.FC<ItemToggleProps> = ({
 			<View style={styles.listItem}>
 				<Icon name={checked ? 'ionicon checkbox-outline' : 'ionicon square-outline'} style={styles.icon} accessibilityLabel={null}/>
 				{item.icon
-					? <Image source={{ uri: item.icon }} style={{ width: 20, height: 20, resizeMode: 'contain' }} accessibilityElementsHidden={true}/>
+					? <Image source={{ uri: item.icon }} style={{ width: 20, height: 20 }} resizeMode="contain" accessibilityElementsHidden={true}/>
 					: <Icon name={item.iconName} style={styles.icon} accessibilityLabel={null}/>
 				}
 				<Text style={styles.labelText}>
