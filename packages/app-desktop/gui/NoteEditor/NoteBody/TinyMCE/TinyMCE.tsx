@@ -870,7 +870,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: Ref<NoteBodyEditorRef>) => {
 						const customIcon = CommandService.instance().icon(pluginCommandName);
 						const iconClassName = CommandService.instance().iconName(pluginCommandName);
 
-						if (customIcon) {
+						if (customIcon && customIcon.startsWith('data:image/')) {
 							editor.ui.registry.addIcon(pluginCommandName, `<img src="${customIcon}" width="24" height="24" alt="" style="object-fit:contain" />`);
 						} else {
 							// Only allow characters that appear in Font Awesome class names: letters, spaces, and dashes.

@@ -6,6 +6,7 @@ import Plugin from '../Plugin';
 import shim from '../../../shim';
 import Logger from '@joplin/utils/Logger';
 import { fromFileExtension } from '../../../mime-utils';
+import { extname } from 'path';
 
 const logger = Logger.create('JoplinCommands');
 
@@ -128,7 +129,7 @@ export default class JoplinCommands {
 					this.plugin_.baseDir, command.icon,
 				);
 
-				const ext = absPath.split('.').pop().toLowerCase();
+				const ext = extname(absPath).slice(1).toLowerCase();
 				if (!allowedIconExtensions.includes(ext)) {
 					logger.warn(`Plugin "${this.plugin_.id}": Icon file "${command.icon}" has unsupported extension "${ext}". Allowed: ${allowedIconExtensions.join(', ')}`);
 				} else {
