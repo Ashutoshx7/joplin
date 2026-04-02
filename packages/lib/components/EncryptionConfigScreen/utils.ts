@@ -108,17 +108,21 @@ export const onMasterPasswordSave = (masterPasswordInput: string) => {
 	Setting.setValue('encryption.masterPassword', masterPasswordInput);
 };
 
-export const useInputMasterPassword = (masterKeys: MasterKeyEntity[], activeMasterKeyId: string) => {
+export const useInputMasterPassword = (_masterKeys: MasterKeyEntity[], activeMasterKeyId: string) => {
 	const [inputMasterPassword, setInputMasterPassword] = useState<string>('');
 
 	const onMasterPasswordSave = useCallback(async () => {
 		Setting.setValue('encryption.masterPassword', inputMasterPassword);
 
-		if (!(await masterPasswordIsValid(inputMasterPassword, masterKeys.find(mk => mk.id === activeMasterKeyId)))) {
+		// Validate against freshly-loaded master key data (not the potentially
+		// stale masterKeys from the closure) to avoid false "invalid" alerts
+		// when the master key has been re-encrypted on another device.
+		const currentMasterKeys = await MasterKey.all();
+		const activeMk = currentMasterKeys.find(mk => mk.id === activeMasterKeyId);
+		if (!(await masterPasswordIsValid(inputMasterPassword, activeMk))) {
 			alert('Password is invalid. Please try again.');
 		}
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [inputMasterPassword]);
+	}, [inputMasterPassword, activeMasterKeyId]);
 
 	const onMasterPasswordChange = useCallback((password: string) => {
 		setInputMasterPassword(password);

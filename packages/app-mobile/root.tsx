@@ -184,6 +184,16 @@ const generalMiddleware = (store: any) => (next: any) => async (action: any) => 
 		|| action.type === 'SETTING_UPDATE_ALL'
 	) {
 		await loadMasterKeysFromSettings(EncryptionService.instance());
+
+		// When the master password changes, clear any items that were disabled
+		// due to failed decryption attempts so they can be retried with the
+		// new password. Without this, items that exceeded maxDecryptionAttempts
+		// would remain permanently undecryptable until the user manually
+		// disables encryption and uses "retry all". (Issue #14984)
+		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'encryption.masterPassword') {
+			await DecryptionWorker.instance().clearDisabledItems();
+		}
+
 		void DecryptionWorker.instance().scheduleStart();
 		const loadedMasterKeyIds = EncryptionService.instance().loadedMasterKeyIds();
 

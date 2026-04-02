@@ -422,7 +422,18 @@ export default class BaseApplication {
 		sideEffects['timeFormat'] = sideEffects['dateFormat'];
 		sideEffects['locale'] = sideEffects['dateFormat'];
 		sideEffects['encryption.passwordCache'] = sideEffects['syncInfoCache'];
-		sideEffects['encryption.masterPassword'] = sideEffects['syncInfoCache'];
+
+		sideEffects['encryption.masterPassword'] = async () => {
+			// Run the same logic as syncInfoCache (reload keys, schedule decrypt)
+			await sideEffects['syncInfoCache']();
+
+			// When the master password changes, clear any items that were disabled
+			// due to failed decryption attempts so they can be retried with the
+			// new password. Without this, items that exceeded maxDecryptionAttempts
+			// would remain permanently undecryptable until the user manually
+			// disables encryption and uses "retry all". (Issue #14984)
+			await DecryptionWorker.instance().clearDisabledItems();
+		};
 		sideEffects['sync.maxConcurrentConnections'] = sideEffects['net.proxyEnabled'];
 		sideEffects['sync.proxyTimeout'] = sideEffects['net.proxyEnabled'];
 		sideEffects['sync.proxyUrl'] = sideEffects['net.proxyEnabled'];

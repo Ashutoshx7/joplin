@@ -10,7 +10,7 @@ import MasterKey from '../../models/MasterKey';
 import BaseItem from '../../models/BaseItem';
 import Synchronizer from '../../Synchronizer';
 import { fetchSyncInfo, getEncryptionEnabled, localSyncInfo, setEncryptionEnabled } from '../synchronizer/syncInfoUtils';
-import { loadMasterKeysFromSettings, setupAndDisableEncryption, setupAndEnableEncryption } from '../e2ee/utils';
+import { loadMasterKeysFromSettings, setupAndDisableEncryption, setupAndEnableEncryption, updateMasterPassword } from '../e2ee/utils';
 import { remoteNotesAndFolders } from '../../testing/test-utils-synchronizer';
 import { EncryptionMethod } from '../e2ee/EncryptionService';
 
@@ -428,6 +428,72 @@ describe('Synchronizer.e2ee', () => {
 
 		expect((await kvStore().all()).length).toBe(0);
 		expect((await decryptionWorker().decryptionDisabledItems()).length).toBe(0);
+	}));
+
+	it('should decrypt items after master password is changed on another client (#14984)', (async () => {
+		// Client 1: Enable E2EE with default password '123456'
+		setEncryptionEnabled(true);
+		const masterKey = await loadEncryptionMasterKey();
+		const folder1 = await Folder.save({ title: 'folder1' });
+		await synchronizerStart();
+
+		// Client 2: Sync and set up decryption
+		await switchClient(2);
+		await synchronizerStart();
+		Setting.setObjectValue('encryption.passwordCache', masterKey.id, '123456');
+		Setting.setValue('encryption.masterPassword', '123456');
+		await loadMasterKeysFromSettings(encryptionService());
+		await decryptionWorker().start();
+
+		// Verify client 2 can decrypt
+		let folder1_2 = await Folder.load(folder1.id);
+		expect(folder1_2.title).toBe('folder1');
+
+		// Client 1: Change master password from '123456' to 'newPassword'
+		// This re-encrypts the master key wrapper but the underlying key plaintext stays the same
+		await switchClient(1);
+		await updateMasterPassword('123456', 'newPassword');
+		await loadMasterKeysFromSettings(encryptionService());
+
+		// Client 1: Modify a folder and sync
+		await Folder.save({ id: folder1.id, title: 'modified' });
+		await synchronizerStart();
+
+		// Client 2: Sync — receives updated master key (re-encrypted with new password)
+		await switchClient(2);
+
+		// Clear the old password cache so the only way to unwrap the master key
+		// is via the master password setting — this simulates a fresh state
+		Setting.setValue('encryption.passwordCache', {});
+
+		// Set the OLD master password — this should NOT be able to unwrap the
+		// re-encrypted master key
+		Setting.setValue('encryption.masterPassword', '123456');
+
+		// Unload all master keys to simulate the state BEFORE any key is loaded
+		// (as would happen after a fresh sync with no cached keys)
+		encryptionService().unloadMasterKey(masterKey);
+
+		await synchronizerStart();
+
+		// Try loading master keys with the old password — should fail for the
+		// re-encrypted key
+		await loadMasterKeysFromSettings(encryptionService());
+
+		// The master key should NOT have been loaded (wrong password)
+		expect(encryptionService().loadedMasterKeysCount()).toBe(0);
+
+		// Now set the correct new password
+		Setting.setValue('encryption.masterPassword', 'newPassword');
+		await loadMasterKeysFromSettings(encryptionService());
+
+		// The master key should now be loaded with the new password
+		expect(encryptionService().loadedMasterKeysCount()).toBeGreaterThan(0);
+
+		// Decryption should now succeed
+		await decryptionWorker().start();
+		folder1_2 = await Folder.load(folder1.id);
+		expect(folder1_2.title).toBe('modified');
 	}));
 
 });

@@ -166,8 +166,9 @@ export default class EncryptionService {
 	}
 
 	public isMasterKeyLoaded(masterKey: MasterKeyEntity) {
-		if (this.encryptedMasterKeys_.get(masterKey.id)) {
-			return true;
+		const e = this.encryptedMasterKeys_.get(masterKey.id);
+		if (e) {
+			return e.updatedTime === masterKey.updated_time;
 		}
 		const d = this.decryptedMasterKeys_.get(masterKey.id);
 		if (!d) return false;
