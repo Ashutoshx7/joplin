@@ -41,6 +41,10 @@ interface ButtonProps {
 	role?: Role;
 
 	disabled?: boolean;
+
+	// Android only: controls whether the button is focusable by hardware keyboard
+	// (e.g. Tab key). Set to false to exclude from tab order.
+	focusable?: boolean;
 }
 
 const IconButton = (props: ButtonProps) => {
@@ -106,6 +110,7 @@ const IconButton = (props: ButtonProps) => {
 			style={[styles.pressable, props.containerStyle]}
 
 			disabled={ props.disabled ?? false }
+			focusable={props.focusable}
 			onLayout={ onButtonLayout }
 
 			accessibilityLabel={props.description}

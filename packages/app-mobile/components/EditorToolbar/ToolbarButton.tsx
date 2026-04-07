@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ToolbarButtonInfo } from '@joplin/lib/services/commands/ToolbarButtonUtils';
 import IconButton from '../IconButton';
 import { memo, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { themeStyle } from '../global-style';
 import useButtonSize from './utils/useButtonSize';
 
@@ -52,6 +52,10 @@ const ToolbarButton: React.FC<Props> = memo(({ themeId, buttonInfo, selected, ex
 		aria-pressed={selected}
 		preventKeyboardDismiss={true}
 		themeId={themeId}
+		// On Android, RN 0.81+ makes Pressable focusable by default, pulling toolbar
+		// buttons into the hardware keyboard tab order. Setting focusable to false
+		// restores the expected Title → Editor tab flow. See #14548.
+		focusable={Platform.OS === 'android' ? false : undefined}
 	/>;
 });
 

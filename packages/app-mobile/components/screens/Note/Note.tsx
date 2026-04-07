@@ -1785,13 +1785,18 @@ class NoteScreenComponent extends BaseScreenComponent<ComponentProps, State> imp
 		};
 
 		const titleToggleButton = !this.state.showMultilineToggle ? null :
-			<IconButton
-				icon={(!this.state.multiline && 'menu-down') || (this.state.multiline && 'menu-up')}
-				accessibilityLabel={(!this.state.multiline && _('Expand title')) || (this.state.multiline && _('Collapse title'))}
-				onPress={() => this.setState({ multiline: !this.state.multiline })}
-				size={30}
-				style={{ width: 30, height: 30, alignSelf: 'center' }}
-			/>;
+			// On Android, RN 0.81+ makes Pressable focusable by default.
+			// Wrapping with focusable={false} keeps this button out of the
+			// hardware keyboard tab order. See #14548.
+			<View focusable={Platform.OS === 'android' ? false : undefined} collapsable={false}>
+				<IconButton
+					icon={(!this.state.multiline && 'menu-down') || (this.state.multiline && 'menu-up')}
+					accessibilityLabel={(!this.state.multiline && _('Expand title')) || (this.state.multiline && _('Collapse title'))}
+					onPress={() => this.setState({ multiline: !this.state.multiline })}
+					size={30}
+					style={{ width: 30, height: 30, alignSelf: 'center' }}
+				/>
+			</View>;
 
 		const titleComp = (
 			<View
