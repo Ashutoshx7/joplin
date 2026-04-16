@@ -31,8 +31,8 @@ export const parseReleaseNotes = (markdown: string | null | undefined): ReleaseN
 			continue;
 		}
 
-		// List items: - item, * item, + item
-		const listMatch = line.match(/^[-*+]\s+(.+)/);
+		// List items: - item, * item, + item, 1. item
+		const listMatch = line.match(/^(?:[-*+]|\d+\.)\s+(.+)/);
 		if (listMatch) {
 			const content = cleanReleaseNoteLine(listMatch[1]);
 			if (content) nodes.push({ type: 'list-item', content });

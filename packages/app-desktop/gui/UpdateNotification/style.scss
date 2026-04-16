@@ -32,7 +32,7 @@
 
 			&:hover {
 				opacity: 1;
-				text-decoration-color: currentColor;
+				text-decoration-color: currentcolor;
 			}
 		}
 	}
@@ -43,7 +43,7 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		scrollbar-gutter: stable;
-		word-break: break-word;
+		overflow-wrap: anywhere;
 		font-size: 0.9em;
 		line-height: 1.5;
 		padding: 4px 6px 4px 10px;

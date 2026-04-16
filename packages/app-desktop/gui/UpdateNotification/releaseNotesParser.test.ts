@@ -2,9 +2,10 @@ import { parseReleaseNotes } from './releaseNotesParser';
 
 describe('releaseNotesParser', () => {
 
-	it('should return empty array for empty or null input', () => {
+	it('should return empty array for empty, null, or undefined input', () => {
 		expect(parseReleaseNotes('')).toEqual([]);
 		expect(parseReleaseNotes(null)).toEqual([]);
+		expect(parseReleaseNotes(undefined)).toEqual([]);
 	});
 
 	it('should parse a heading', () => {
@@ -13,10 +14,18 @@ describe('releaseNotesParser', () => {
 		]);
 	});
 
-	it('should parse list items', () => {
+	it('should parse unordered list items', () => {
 		expect(parseReleaseNotes('- Item one\n- Item two')).toEqual([
 			{ type: 'list-item', content: 'Item one' },
 			{ type: 'list-item', content: 'Item two' },
+		]);
+	});
+
+	it('should parse numbered list items', () => {
+		expect(parseReleaseNotes('1. First\n2. Second\n3. Third')).toEqual([
+			{ type: 'list-item', content: 'First' },
+			{ type: 'list-item', content: 'Second' },
+			{ type: 'list-item', content: 'Third' },
 		]);
 	});
 
@@ -34,6 +43,22 @@ describe('releaseNotesParser', () => {
 			{ type: 'list-item', content: 'Fixed bug' },
 			{ type: 'list-item', content: 'Added feature' },
 			{ type: 'list-item', content: 'Improved sync' },
+		]);
+	});
+
+	it('should handle multiple issue references on one line without eating content', () => {
+		const input = '- Fixed bug (#123 by @user) and improved perf (#456 by @dev)';
+		const result = parseReleaseNotes(input);
+		expect(result).toEqual([
+			{ type: 'list-item', content: 'Fixed bug and improved perf' },
+		]);
+	});
+
+	it('should strip markdown links to plain text', () => {
+		const input = '- See [documentation](https://joplinapp.org/help) for details';
+		const result = parseReleaseNotes(input);
+		expect(result).toEqual([
+			{ type: 'list-item', content: 'See documentation for details' },
 		]);
 	});
 

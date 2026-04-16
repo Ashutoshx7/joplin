@@ -43,7 +43,8 @@ function getMajorMinorTagName(tagName: string) {
 // - Bare issue numbers: (#4727)
 export const cleanReleaseNoteLine = (line: string): string => {
 	return line
-		.replace(/\(#.* by .*\)/g, '')
+		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+		.replace(/\(#.*? by .*?\)/g, '')
 		.replace(/\([0-9a-z]{7}\)/g, '')
 		.replace(/\(#[0-9]+\)/g, '')
 		.replace(/ {2}/g, ' ')

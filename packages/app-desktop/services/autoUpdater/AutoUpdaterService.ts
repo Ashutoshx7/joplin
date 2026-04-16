@@ -221,6 +221,9 @@ export default class AutoUpdaterService implements AutoUpdaterServiceInterface {
 	};
 
 	private promptUserToUpdate = async (info: UpdateInfo): Promise<void> => {
+		if (!this.latestRelease_) {
+			this.logger_.warn('promptUserToUpdate: latestRelease_ is not set; release notes will be empty');
+		}
 		const updateInfo: UpdateDownloadedInfo = {
 			version: info.version,
 			releaseNotes: this.latestRelease_?.body ?? '',
